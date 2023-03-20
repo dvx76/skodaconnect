@@ -1832,20 +1832,19 @@ class Vehicle:
         return False
 
     @property
-    def charging_time_left(self):
+    def charging_time_left(self) -> float:
         """Return minutes to charging complete"""
         if self.external_power:
             if self.attrs.get('charging', {}).get('remainingToCompleteInSeconds', False):
                 minutes = int(self.attrs.get('charging', {}).get('remainingToCompleteInSeconds', 0))/60
             elif self.attrs.get('charger', {}).get('status', {}).get('batteryStatusData', {}).get('remainingChargingTime', False):
-                minutes = self.attrs.get('charger', {}).get('status', {}).get('batteryStatusData', {}).get('remainingChargingTime', {}).get('content', 0)
+                minutes = int(self.attrs.get('charger', {}).get('status', {}).get('batteryStatusData', {}).get('remainingChargingTime', {}).get('content', 0))
             try:
-                if minutes == -1: return '00:00'
-                if minutes == 65535: return '00:00'
-                return "%02d:%02d" % divmod(minutes, 60)
+                if 0 <= minutes <= 65535:
+                    return minutes
             except Exception:
                 pass
-        return '00:00'
+        return 0.0
 
     @property
     def is_charging_time_left_supported(self):
@@ -2161,17 +2160,16 @@ class Vehicle:
         return False
 
     @property
-    def climatisation_time_left(self):
-        """Return time left for climatisation in hours:minutes."""
+    def climatisation_time_left(self) -> float:
+        """Return time left for climatisation in minutes."""
         if self.attrs.get('airConditioning', {}).get('remainingTimeToReachTargetTemperatureInSeconds', False):
             try:
                 minutes = int(self.attrs.get('airConditioning', {}).get('remainingTimeToReachTargetTemperatureInSeconds', 0))/60
-                if not 0 <= minutes <= 65535:
-                    return "00:00"
-                return "%02d:%02d" % divmod(minutes, 60)
+                if 0 <= minutes <= 65535:
+                    return minutes
             except Exception:
                 pass
-        return "00:00"
+        return 0.0
 
     @property
     def is_climatisation_time_left_supported(self):
